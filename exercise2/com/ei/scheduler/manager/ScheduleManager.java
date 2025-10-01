@@ -1,5 +1,6 @@
 package com.ei.scheduler.manager;
 
+import com.ei.scheduler.model.Priority;
 import com.ei.scheduler.model.Task;
 import com.ei.scheduler.observer.Observer;
 
@@ -93,5 +94,14 @@ public class ScheduleManager {
         notifyObservers("Task not found: " + description);
         return false;
     }
-
+    public List<Task> viewTasksByPriority(Priority priority) {
+    List<Task> filtered = new ArrayList<>();
+    for (Task t : tasks) {
+        if (t.getPriority() == priority) {
+            filtered.add(t);
+        }
+    }
+    filtered.sort(Comparator.comparing(Task::getStartTime));
+    return filtered;
+    }
 }
