@@ -5,6 +5,7 @@ import com.ei.scheduler.model.Priority;
 import com.ei.scheduler.model.Task;
 
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -52,42 +53,60 @@ public class MenuController {
 
     private void addTask() {
         System.out.print("Enter description: ");
-        String desc = sc.nextLine();
-
-        System.out.print("Enter start time (HH:mm): ");
-        String start = sc.nextLine();
-
-        System.out.print("Enter end time (HH:mm): ");
-        String end = sc.nextLine();
-
-        System.out.print("Enter priority (HIGH, MEDIUM, LOW): ");
-        String pr = sc.nextLine();
+        String desc = sc.nextLine().trim();
+        if (desc.isEmpty()) {
+            System.out.println("Description cannot be empty.");
+            return;
+        }
 
         try {
-            Task newTask = new Task(
-                    desc,
-                    LocalTime.parse(start),
-                    LocalTime.parse(end),
-                    Priority.valueOf(pr.toUpperCase())
-            );
+            System.out.print("Enter start time (HH:mm): ");
+            LocalTime startTime = LocalTime.parse(sc.nextLine().trim());
 
+            System.out.print("Enter end time (HH:mm): ");
+            LocalTime endTime = LocalTime.parse(sc.nextLine().trim());
+
+            if (endTime.isBefore(startTime)) {
+                System.out.println("End time must be after start time.");
+                return;
+            }
+
+            System.out.print("Enter priority (HIGH, MEDIUM, LOW): ");
+            String pr = sc.nextLine().trim().toUpperCase();
+            Priority priority;
+            try {
+                priority = Priority.valueOf(pr);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid priority. Use HIGH, MEDIUM, or LOW.");
+                return;
+            }
+
+            Task newTask = new Task(desc, startTime, endTime, priority);
             if (manager.addTask(newTask)) {
                 System.out.println("Task added successfully.");
             }
-        } catch (Exception e) {
-            System.out.println("Error: Invalid input. " + e.getMessage());
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid time format. Please use HH:mm (e.g., 07:30).");
         }
     }
 
     private void removeTask() {
         System.out.print("Enter description of task to remove: ");
-        String desc = sc.nextLine();
+        String desc = sc.nextLine().trim();
+        if (desc.isEmpty()) {
+            System.out.println("Task description cannot be empty.");
+            return;
+        }
         manager.removeTask(desc);
     }
 
     private void markCompleted() {
         System.out.print("Enter description of task to mark completed: ");
-        String desc = sc.nextLine();
+        String desc = sc.nextLine().trim();
+        if (desc.isEmpty()) {
+            System.out.println("Task description cannot be empty.");
+            return;
+        }
         manager.markTaskCompleted(desc);
     }
 
@@ -103,16 +122,17 @@ public class MenuController {
 
     private void viewTasksByPriority() {
         System.out.print("Enter priority to filter (HIGH, MEDIUM, LOW): ");
-        String pr = sc.nextLine();
+        String pr = sc.nextLine().trim().toUpperCase();
         try {
-            List<Task> filtered = manager.viewTasksByPriority(Priority.valueOf(pr.toUpperCase()));
+            Priority priority = Priority.valueOf(pr);
+            List<Task> filtered = manager.viewTasksByPriority(priority);
             if (filtered.isEmpty()) {
-                System.out.println("No tasks found for priority " + pr.toUpperCase());
+                System.out.println("No tasks found for priority " + pr);
             } else {
                 filtered.forEach(System.out::println);
             }
         } catch (IllegalArgumentException e) {
-            System.out.println("Invalid priority entered.");
+            System.out.println("Invalid priority entered. Use HIGH, MEDIUM, or LOW.");
         }
     }
 
@@ -120,7 +140,7 @@ public class MenuController {
     private int readInt(String message) {
         while (true) {
             System.out.print(message);
-            String input = sc.nextLine();
+            String input = sc.nextLine().trim();
             try {
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
