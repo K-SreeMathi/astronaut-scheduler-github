@@ -81,4 +81,17 @@ public class ScheduleManager {
     private boolean isOverlap(Task t1, Task t2) {
         return !(t2.getEndTime().isBefore(t1.getStartTime()) || t2.getStartTime().isAfter(t1.getEndTime()));
     }
+    // Mark a task as completed by description
+    public boolean markTaskCompleted(String description) {
+        for (Task t : tasks) {
+            if (t.getDescription().equalsIgnoreCase(description)) {
+                t.markCompleted(); 
+                notifyObservers("Task marked completed: " + description);
+                return true;
+            }
+        }
+        notifyObservers("Task not found: " + description);
+        return false;
+    }
+
 }

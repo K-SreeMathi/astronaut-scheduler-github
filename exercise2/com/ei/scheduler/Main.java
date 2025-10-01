@@ -8,7 +8,7 @@ import com.ei.scheduler.observer.AstronautObserver;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("🚀 Astronaut Daily Schedule Organizer started...");
+        System.out.println("Astronaut Daily Schedule Organizer started...");
 
         ScheduleManager manager = ScheduleManager.getInstance();
 
@@ -36,5 +36,14 @@ public class Main {
         manager.removeTask("Team Meeting");
                
         manager.removeTask("Non-existent Task");
+        // Mark "Morning Exercise" as completed
+        manager.markTaskCompleted("Morning Exercise");
+
+        // View all tasks to see the completed status
+        System.out.println("\nAll Tasks:");
+        for (Task t : manager.viewTasks()) {
+            System.out.println(t);
+        }
+
     }
 }
